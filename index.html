@@ -350,9 +350,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     <div class="test-box">
       <div class="test-box-title">🧪 Testing Deductions (cumulative)</div>
       <div class="frow3">
-        <div class="fg"><label style="color:var(--c-ms);">MS (L)</label><input type="number" id="test-ms" placeholder="0.000" step="0.001" oninput="recalcAll()"></div>
-        <div class="fg"><label style="color:var(--c-hsd);">HSD (L)</label><input type="number" id="test-hsd" placeholder="0.000" step="0.001" oninput="recalcAll()"></div>
-        <div class="fg"><label style="color:var(--c-pow);">Power (L)</label><input type="number" id="test-pow" placeholder="0.000" step="0.001" oninput="recalcAll()"></div>
+        <div class="fg"><label style="color:var(--c-ms);">MS (L)</label><input type="number" id="test-ms" placeholder="0.000" step="0.001" inputmode="decimal" oninput="recalcAll()"></div>
+        <div class="fg"><label style="color:var(--c-hsd);">HSD (L)</label><input type="number" id="test-hsd" placeholder="0.000" step="0.001" inputmode="decimal" oninput="recalcAll()"></div>
+        <div class="fg"><label style="color:var(--c-pow);">Power (L)</label><input type="number" id="test-pow" placeholder="0.000" step="0.001" inputmode="decimal" oninput="recalcAll()"></div>
       </div>
     </div>
 
@@ -370,7 +370,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
       <div class="fg"><label>Fuel</label>
         <select id="cr-fuel"><option value="MS">MS Petrol</option><option value="HSD">HSD Diesel</option><option value="Power">Power</option></select>
       </div>
-      <div class="fg"><label>Amount (₹)</label><input type="number" id="cr-amt" placeholder="0.00"></div>
+      <div class="fg"><label>Amount (₹)</label><input type="number" id="cr-amt" placeholder="0.00" inputmode="decimal"></div>
     </div>
     <button class="btn btn-ghost" onclick="addCredit()">+ Add Credit Entry</button>
     <div style="margin-top:10px;" id="cr-list"></div>
@@ -384,14 +384,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
   <div class="sbox">
     <div class="sbox-title"><div class="pill" style="background:var(--green)"></div>Cash &amp; Collection</div>
     <div class="frow">
-      <div class="fg"><label>Cash Part 1 (₹)</label><input type="number" id="cash1" placeholder="0.00" oninput="calcDiff()"></div>
-      <div class="fg"><label>Cash Part 2 (₹)</label><input type="number" id="cash2" placeholder="0.00" oninput="calcDiff()"></div>
+      <div class="fg"><label>Cash Part 1 (₹)</label><input type="number" id="cash1" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
+      <div class="fg"><label>Cash Part 2 (₹)</label><input type="number" id="cash2" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
     </div>
     <div class="frow">
-      <div class="fg"><label>Cash Part 3 (₹)</label><input type="number" id="cash3" placeholder="0.00" oninput="calcDiff()"></div>
-      <div class="fg"><label>Paytm (₹)</label><input type="number" id="paytm" placeholder="0.00" oninput="calcDiff()"></div>
+      <div class="fg"><label>Cash Part 3 (₹)</label><input type="number" id="cash3" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
+      <div class="fg"><label>Paytm (₹)</label><input type="number" id="paytm" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
     </div>
-    <div class="fg"><label>Online Bank Transfer (₹)</label><input type="number" id="bank-transfer" placeholder="0.00" oninput="calcDiff()"></div>
+    <div class="frow">
+      <div class="fg"><label>Online Bank Transfer (₹)</label><input type="number" id="bank-transfer" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
+      <div class="fg"><label>HP Pay (₹)</label><input type="number" id="hp-pay" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
+    </div>
+    <div class="fg"><label>CCMS (₹)</label><input type="number" id="ccms" placeholder="0.00" inputmode="decimal" oninput="calcDiff()"></div>
     <div class="tbar">
       <div class="tbar-lbl">Total Collected</div>
       <div class="tbar-val" style="color:var(--green);" id="coll-total">₹0</div>
@@ -405,7 +409,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
       <select id="exp-cat" onchange="onExpCat()">
         <option value="">Select...</option>
         <optgroup label="— Tanker —"><option>Tanker Diesel</option><option>Tanker Bhatta</option><option>Tanker Expenses</option></optgroup>
-        <optgroup label="— Staff —"><option>Staff Salary</option><option>Advance</option><option>Nashta</option><option>Tiffin</option></optgroup>
+        <optgroup label="— Staff —"><option>Staff Salary</option><option>Advance</option><option>Incentive</option><option>Nashta</option><option>Tiffin</option></optgroup>
         <optgroup label="— Operations —"><option>Density</option><option>Maintenance</option><option>Cleaning</option><option>Miscellaneous</option><option>Other</option></optgroup>
       </select>
     </div>
@@ -413,7 +417,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
       <select id="exp-emp"><option value="">Select employee...</option></select>
     </div>
     <div class="fg"><label>Description</label><input type="text" id="exp-desc" placeholder="Details..."></div>
-    <div class="fg"><label>Amount (₹)</label><input type="number" id="exp-amt" placeholder="0.00"></div>
+    <div class="fg"><label>Amount (₹)</label><input type="number" id="exp-amt" placeholder="0.00" inputmode="decimal"></div>
     <button class="btn btn-ghost" onclick="addExpense()">+ Add Expense</button>
     <div style="margin-top:10px;" id="exp-list"></div>
     <div id="exp-tbar" style="display:none;" class="tbar">
@@ -428,7 +432,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     <p class="sbox-sub">Log tanker arrival. Add tanker costs in Expenses above.</p>
     <div class="frow">
       <div class="fg"><label>Fuel</label><select id="t-fuel"><option value="MS">MS Petrol</option><option value="HSD">HSD Diesel</option><option value="Power">Power</option></select></div>
-      <div class="fg"><label>Volume (L)</label><input type="number" id="t-vol" placeholder="0.000" step="0.001"></div>
+      <div class="fg"><label>Volume (L)</label><input type="number" id="t-vol" placeholder="0.000" step="0.001" inputmode="decimal"></div>
     </div>
     <div class="fg"><label>Tanker No.</label><input type="text" id="t-no" placeholder="MH-XX-XXXX"></div>
     <button class="btn btn-ghost" onclick="addTanker()">+ Add Tanker</button>
@@ -895,6 +899,7 @@ async function syncNow(){
         msRate:parseFloat(e.ms_rate)||0, hsdRate:parseFloat(e.hsd_rate)||0, powRate:parseFloat(e.pow_rate)||0,
         cash1:parseFloat(e.cash1)||0, cash2:parseFloat(e.cash2)||0, cash3:parseFloat(e.cash3)||0,
         paytm:parseFloat(e.paytm)||0, bankTransfer:parseFloat(e.bank_transfer)||0,
+        hpPay:parseFloat(e.hp_pay)||0, ccms:parseFloat(e.ccms)||0,
         creditGiven:parseFloat(e.credit_given)||0,
         expenses:[], tankers:[], // populated from separate tables
         _id:e.id,
@@ -1066,6 +1071,8 @@ function onDateChange(){
     document.getElementById('cash1').value=ex.cash1||'';document.getElementById('cash2').value=ex.cash2||'';
     document.getElementById('cash3').value=ex.cash3||'';document.getElementById('paytm').value=ex.paytm||'';
     document.getElementById('bank-transfer').value=ex.bankTransfer||'';
+    document.getElementById('hp-pay').value=ex.hpPay||'';
+    document.getElementById('ccms').value=ex.ccms||'';
     tEx=[...(ex.expenses||[])];tTk=[...(ex.tankers||[])];
     tCr=C.credits().filter(c=>c.date===dateStr).map(c=>({...c}));
     renderTCr();renderTEx();renderTTk();
@@ -1135,7 +1142,9 @@ function calcDiff(){
   const c3=parseFloat(document.getElementById('cash3')?.value)||0;
   const pt=parseFloat(document.getElementById('paytm')?.value)||0;
   const bt=parseFloat(document.getElementById('bank-transfer')?.value)||0;
-  const coll=c1+c2+c3+pt+bt;
+  const hp=parseFloat(document.getElementById('hp-pay')?.value)||0;
+  const cm=parseFloat(document.getElementById('ccms')?.value)||0;
+  const coll=c1+c2+c3+pt+bt+hp+cm;
   const collEl=document.getElementById('coll-total');if(collEl)collEl.textContent=fmt(coll);
   const exp=tEx.reduce((s,e)=>s+e.amount,0);
   const diff=rev-cr-coll-exp;
@@ -1153,7 +1162,7 @@ function calcDiff(){
 
 function onExpCat(){
   const v=document.getElementById('exp-cat').value;
-  const g=document.getElementById('exp-emp-grp');if(g)g.style.display=v==='Advance'?'block':'none';
+  const g=document.getElementById('exp-emp-grp');if(g)g.style.display=(v==='Advance'||v==='Incentive')?'block':'none';
 }
 
 // Temp entry helpers
@@ -1180,7 +1189,7 @@ function addExpense(){
   let desc=document.getElementById('exp-desc').value.trim();
   const amt=parseFloat(document.getElementById('exp-amt').value)||0;
   if(!cat||!amt){toast('Select category and enter amount');return;}
-  if(cat==='Advance'){const emp=document.getElementById('exp-emp').value;if(!emp){toast('Select employee');return;}desc=emp+(desc?': '+desc:'');}
+  if(cat==='Advance'||cat==='Incentive'){const emp=document.getElementById('exp-emp').value;if(!emp){toast('Select employee');return;}desc=emp+(desc?': '+desc:'');}
   tEx.push({category:cat,description:desc,amount:amt});renderTEx();
   document.getElementById('exp-cat').value='';document.getElementById('exp-desc').value='';document.getElementById('exp-amt').value='';
   document.getElementById('exp-emp-grp').style.display='none';calcDiff();
@@ -1251,6 +1260,8 @@ async function saveEntry(){
     const cash3=parseFloat(document.getElementById('cash3').value)||0;
     const paytm=parseFloat(document.getElementById('paytm').value)||0;
     const bankTransfer=parseFloat(document.getElementById('bank-transfer').value)||0;
+    const hpPay=parseFloat(document.getElementById('hp-pay').value)||0;
+    const ccms=parseFloat(document.getElementById('ccms').value)||0;
     const creditGiven=tCr.reduce((s,c)=>s+c.amount,0);
 
     // Upsert to Supabase
@@ -1259,7 +1270,8 @@ async function saveEntry(){
       nozzles, testing_ms:testMs, testing_hsd:testHsd, testing_pow:testPow,
       ms_vol:msV,hsd_vol:hsdV,pow_vol:powV,ms_amt:msA,hsd_amt:hsdA,pow_amt:powA,
       ms_rate:rates.ms,hsd_rate:rates.hsd,pow_rate:rates.pow,
-      cash1,cash2,cash3,paytm,bank_transfer:bankTransfer,credit_given:creditGiven,updated_at:new Date().toISOString(),
+      cash1,cash2,cash3,paytm,bank_transfer:bankTransfer,hp_pay:hpPay,ccms,
+      credit_given:creditGiven,updated_at:new Date().toISOString(),
     };
     const saved=await sb('daily_entries','POST',entryRow,'?on_conflict=entry_date');
 
@@ -1292,7 +1304,7 @@ function clearEntry(){
     const c=document.getElementById('c-'+id);if(c)c.value='';
     const v=document.getElementById('v-'+id);if(v){v.textContent='—';v.className='vm';}
   });
-  ['test-ms','test-hsd','test-pow','e-remarks','cash1','cash2','cash3','paytm','bank-transfer'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['test-ms','test-hsd','test-pow','e-remarks','cash1','cash2','cash3','paytm','bank-transfer','hp-pay','ccms'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   tCr=[];tEx=[];tTk=[];renderTCr();renderTEx();renderTTk();
   ['ms','hsd','pow'].forEach(f=>{
     document.getElementById(f+'-vol').textContent='0.000 L';
@@ -1316,7 +1328,7 @@ function renderDash(){
   if(ye) bar.innerHTML=`<span class="pill-info">📊 Yesterday: ${DS(yest)}</span>`;
   else   bar.innerHTML=`<span class="pill-warn">No entry for yesterday (${DS(yest)})</span>`;
   let rev=0,cash=0,exp=0;
-  if(ye){rev=ye.msA+ye.hsdA+ye.powA;cash=(ye.cash1||0)+(ye.cash2||0)+(ye.cash3||0)+(ye.paytm||0)+(ye.bankTransfer||0);exp=ye.expenses.reduce((s,e)=>s+e.amount,0);}
+  if(ye){rev=ye.msA+ye.hsdA+ye.powA;cash=(ye.cash1||0)+(ye.cash2||0)+(ye.cash3||0)+(ye.paytm||0)+(ye.bankTransfer||0)+(ye.hpPay||0)+(ye.ccms||0);exp=ye.expenses.reduce((s,e)=>s+e.amount,0);}
   const totC=credits.reduce((s,c)=>s+c.amount,0);const totR=recs.reduce((s,r)=>s+r.amount,0);
   document.getElementById('dash-rev').textContent=fmt(rev);
   document.getElementById('dash-cash').textContent=fmt(cash);
