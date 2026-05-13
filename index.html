@@ -228,9 +228,18 @@ table.gt tr:last-child td{border-bottom:none;}
 /* ── SPINNER ── */
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 
+/* ── PIN MODAL ── */
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:background .15s,border-color .15s;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
+.pin-key{background:var(--surf2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'Syne',sans-serif;font-size:20px;font-weight:700;padding:16px 8px;cursor:pointer;transition:all .15s;}
+.pin-key:active{background:var(--surf3);border-color:var(--accent);}
+.pin-key-cancel{font-size:16px;color:var(--text3);}
+.pin-key-del{font-size:18px;color:var(--text2);}
+#pin-overlay.open{display:flex!important;}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
-@media print{.top-bar,.bottom-nav,.more-menu,.sync-btn{display:none!important;}#app{max-width:100%;}.scroll-area{padding-bottom:0;}}
+@media print{.top-bar,.bottom-nav,.more-menu,.sync-btn,#pin-overlay{display:none!important;}#app{max-width:100%;}.scroll-area{padding-bottom:0;}}
 </style>
 </head>
 <body>
@@ -689,7 +698,39 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
   <div class="more-btn" onclick="showPage('employees',null);closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Employees</div>
   <div class="more-btn" onclick="showPage('stock',null);closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Stock</div>
   <div class="more-btn" onclick="showPage('reports',null);closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Reports</div>
-  <div class="more-btn" onclick="showPage('settings',null);closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
+  <div class="more-btn" onclick="openPinModal();closeMore()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings 🔒</div>
+</div>
+
+<!-- PIN MODAL -->
+<div id="pin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:28px 24px;width:300px;max-width:90vw;text-align:center;">
+    <div style="font-size:28px;margin-bottom:8px;">🔒</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px;">Settings Access</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:20px;">Enter 4-digit PIN to continue</div>
+    <!-- PIN dots display -->
+    <div id="pin-dots" style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div id="pin-error" style="font-size:12px;color:var(--red);height:16px;margin-bottom:10px;"></div>
+    <!-- Numpad -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key pin-key-cancel" onclick="closePinModal()">✕</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-key-del" onclick="pinDel()">⌫</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -698,8 +739,55 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
 
 <script>
 // ================================================================
-// SUPABASE CONFIG
+// SETTINGS PIN  — change SETTINGS_PIN to update the access code
 // ================================================================
+const SETTINGS_PIN = '9876';
+let pinEntry = '';
+
+function openPinModal(){
+  pinEntry = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-overlay').classList.add('open');
+}
+function closePinModal(){
+  document.getElementById('pin-overlay').classList.remove('open');
+  pinEntry = '';
+  updatePinDots();
+}
+function pinKey(digit){
+  if(pinEntry.length >= 4) return;
+  pinEntry += digit;
+  updatePinDots();
+  if(pinEntry.length === 4) setTimeout(checkPin, 120); // slight delay so last dot shows
+}
+function pinDel(){
+  pinEntry = pinEntry.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('pd'+i).classList.toggle('filled', i < pinEntry.length);
+  }
+}
+function checkPin(){
+  if(pinEntry === SETTINGS_PIN){
+    closePinModal();
+    showPage('settings', null);
+  } else {
+    document.getElementById('pin-error').textContent = '✕ Incorrect PIN. Try again.';
+    // shake the dots
+    const dots = document.getElementById('pin-dots');
+    dots.style.animation = 'none';
+    dots.offsetHeight; // reflow
+    dots.style.animation = 'shake .35s ease';
+    pinEntry = '';
+    setTimeout(() => { updatePinDots(); dots.style.animation = ''; }, 400);
+  }
+}
+
+
 const SB_URL = 'https://vbywiautmwnxrghsophs.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZieXdpYXV0bXdueHJnaHNvcGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NjM3NjksImV4cCI6MjA5NDIzOTc2OX0.N4AQoYETabCnDNlL6WbhB9F5shizZgs6nBhDUNGe-tE';
 const H = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'};
