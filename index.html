@@ -389,8 +389,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     </div>
     <div class="frow">
       <div class="fg"><label>Cash Part 3 (₹)</label><input type="number" id="cash3" placeholder="0.00" oninput="calcDiff()"></div>
-      <div class="fg"><label>Paytm / Online (₹)</label><input type="number" id="paytm" placeholder="0.00" oninput="calcDiff()"></div>
+      <div class="fg"><label>Paytm (₹)</label><input type="number" id="paytm" placeholder="0.00" oninput="calcDiff()"></div>
     </div>
+    <div class="fg"><label>Online Bank Transfer (₹)</label><input type="number" id="bank-transfer" placeholder="0.00" oninput="calcDiff()"></div>
     <div class="tbar">
       <div class="tbar-lbl">Total Collected</div>
       <div class="tbar-val" style="color:var(--green);" id="coll-total">₹0</div>
@@ -892,7 +893,8 @@ async function syncNow(){
         msV:parseFloat(e.ms_vol)||0, hsdV:parseFloat(e.hsd_vol)||0, powV:parseFloat(e.pow_vol)||0,
         msA:parseFloat(e.ms_amt)||0, hsdA:parseFloat(e.hsd_amt)||0, powA:parseFloat(e.pow_amt)||0,
         msRate:parseFloat(e.ms_rate)||0, hsdRate:parseFloat(e.hsd_rate)||0, powRate:parseFloat(e.pow_rate)||0,
-        cash1:parseFloat(e.cash1)||0, cash2:parseFloat(e.cash2)||0, cash3:parseFloat(e.cash3)||0, paytm:parseFloat(e.paytm)||0,
+        cash1:parseFloat(e.cash1)||0, cash2:parseFloat(e.cash2)||0, cash3:parseFloat(e.cash3)||0,
+        paytm:parseFloat(e.paytm)||0, bankTransfer:parseFloat(e.bank_transfer)||0,
         creditGiven:parseFloat(e.credit_given)||0,
         expenses:[], tankers:[], // populated from separate tables
         _id:e.id,
@@ -1063,6 +1065,7 @@ function onDateChange(){
     document.getElementById('e-remarks').value=ex.remarks||'';
     document.getElementById('cash1').value=ex.cash1||'';document.getElementById('cash2').value=ex.cash2||'';
     document.getElementById('cash3').value=ex.cash3||'';document.getElementById('paytm').value=ex.paytm||'';
+    document.getElementById('bank-transfer').value=ex.bankTransfer||'';
     tEx=[...(ex.expenses||[])];tTk=[...(ex.tankers||[])];
     tCr=C.credits().filter(c=>c.date===dateStr).map(c=>({...c}));
     renderTCr();renderTEx();renderTTk();
@@ -1131,7 +1134,8 @@ function calcDiff(){
   const c2=parseFloat(document.getElementById('cash2')?.value)||0;
   const c3=parseFloat(document.getElementById('cash3')?.value)||0;
   const pt=parseFloat(document.getElementById('paytm')?.value)||0;
-  const coll=c1+c2+c3+pt;
+  const bt=parseFloat(document.getElementById('bank-transfer')?.value)||0;
+  const coll=c1+c2+c3+pt+bt;
   const collEl=document.getElementById('coll-total');if(collEl)collEl.textContent=fmt(coll);
   const exp=tEx.reduce((s,e)=>s+e.amount,0);
   const diff=rev-cr-coll-exp;
@@ -1246,6 +1250,7 @@ async function saveEntry(){
     const cash2=parseFloat(document.getElementById('cash2').value)||0;
     const cash3=parseFloat(document.getElementById('cash3').value)||0;
     const paytm=parseFloat(document.getElementById('paytm').value)||0;
+    const bankTransfer=parseFloat(document.getElementById('bank-transfer').value)||0;
     const creditGiven=tCr.reduce((s,c)=>s+c.amount,0);
 
     // Upsert to Supabase
@@ -1254,7 +1259,7 @@ async function saveEntry(){
       nozzles, testing_ms:testMs, testing_hsd:testHsd, testing_pow:testPow,
       ms_vol:msV,hsd_vol:hsdV,pow_vol:powV,ms_amt:msA,hsd_amt:hsdA,pow_amt:powA,
       ms_rate:rates.ms,hsd_rate:rates.hsd,pow_rate:rates.pow,
-      cash1,cash2,cash3,paytm,credit_given:creditGiven,updated_at:new Date().toISOString(),
+      cash1,cash2,cash3,paytm,bank_transfer:bankTransfer,credit_given:creditGiven,updated_at:new Date().toISOString(),
     };
     const saved=await sb('daily_entries','POST',entryRow,'?on_conflict=entry_date');
 
@@ -1287,7 +1292,7 @@ function clearEntry(){
     const c=document.getElementById('c-'+id);if(c)c.value='';
     const v=document.getElementById('v-'+id);if(v){v.textContent='—';v.className='vm';}
   });
-  ['test-ms','test-hsd','test-pow','e-remarks','cash1','cash2','cash3','paytm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['test-ms','test-hsd','test-pow','e-remarks','cash1','cash2','cash3','paytm','bank-transfer'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   tCr=[];tEx=[];tTk=[];renderTCr();renderTEx();renderTTk();
   ['ms','hsd','pow'].forEach(f=>{
     document.getElementById(f+'-vol').textContent='0.000 L';
@@ -1311,7 +1316,7 @@ function renderDash(){
   if(ye) bar.innerHTML=`<span class="pill-info">📊 Yesterday: ${DS(yest)}</span>`;
   else   bar.innerHTML=`<span class="pill-warn">No entry for yesterday (${DS(yest)})</span>`;
   let rev=0,cash=0,exp=0;
-  if(ye){rev=ye.msA+ye.hsdA+ye.powA;cash=(ye.cash1||0)+(ye.cash2||0)+(ye.cash3||0)+(ye.paytm||0);exp=ye.expenses.reduce((s,e)=>s+e.amount,0);}
+  if(ye){rev=ye.msA+ye.hsdA+ye.powA;cash=(ye.cash1||0)+(ye.cash2||0)+(ye.cash3||0)+(ye.paytm||0)+(ye.bankTransfer||0);exp=ye.expenses.reduce((s,e)=>s+e.amount,0);}
   const totC=credits.reduce((s,c)=>s+c.amount,0);const totR=recs.reduce((s,r)=>s+r.amount,0);
   document.getElementById('dash-rev').textContent=fmt(rev);
   document.getElementById('dash-cash').textContent=fmt(cash);
