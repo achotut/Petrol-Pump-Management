@@ -271,10 +271,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
   </div>
   <div id="dash-bar" style="margin-bottom:10px;"></div>
   <div class="cards-grid">
-    <div class="card ca"><div class="card-lbl">Yesterday</div><div class="card-val" id="dash-rev">₹0</div><div class="card-sub">Revenue</div></div>
+    <div class="card ca"><div class="card-lbl">Last Entry</div><div class="card-val" id="dash-rev">₹0</div><div class="card-sub" id="dash-rev-sub">Revenue</div></div>
     <div class="card cg"><div class="card-lbl">Collected</div><div class="card-val" id="dash-cash">₹0</div><div class="card-sub">Cash + Online</div></div>
     <div class="card cr"><div class="card-lbl">Credit Due</div><div class="card-val" id="dash-cred">₹0</div><div class="card-sub">Outstanding</div></div>
-    <div class="card cb"><div class="card-lbl">Expenses</div><div class="card-val" id="dash-exp">₹0</div><div class="card-sub">Yesterday</div></div>
+    <div class="card cb"><div class="card-lbl">Expenses</div><div class="card-val" id="dash-exp">₹0</div><div class="card-sub" id="dash-exp-sub">Last entry</div></div>
   </div>
   <div class="sbox">
     <div class="sbox-title"><div class="pill" style="background:var(--accent)"></div>Fuel Sales</div>
@@ -1157,6 +1157,38 @@ function refreshEmpDrop(){
 
 function onDateChange(){
   const dateStr=document.getElementById('e-date').value;if(!dateStr)return;
+
+  // ── SEQUENTIAL DATE GUARD ──────────────────────────────────────
+  // Find the most recent saved entry. If there is a gap between that
+  // entry and the selected date (i.e. at least one unsaved day in between),
+  // block the user and point them to the missing date.
+  const entries=C.entries(); // already sorted newest-first
+  const existing=entries.find(e=>e.date===dateStr); // allow re-opening saved dates
+  if(!existing && entries.length>0){
+    const lastSaved=entries[0].date; // newest saved date (YYYY-MM-DD)
+    // Compute the NEXT expected date after lastSaved
+    const nextExpected=new Date(lastSaved+'T00:00:00');
+    nextExpected.setDate(nextExpected.getDate()+1);
+    const nextStr=nextExpected.toISOString().slice(0,10);
+    // If selected date is AFTER the next expected date → gap exists
+    if(dateStr>nextStr){
+      // Reset the date picker back to the next expected date
+      document.getElementById('e-date').value=nextStr;
+      // Show blocking message
+      const st=document.getElementById('e-status');
+      st.innerHTML=`<span class="pill-warn" style="font-size:12.5px;line-height:1.5;">
+        ⚠ Please enter data for <b>${DS(nextStr)}</b> first.<br>
+        <span style="font-size:11px;opacity:.8;">You cannot skip dates. Last saved entry: ${DS(lastSaved)}.</span>
+      </span>`;
+      // Clear any stale field values and re-trigger with the corrected date
+      clearEntry();
+      // Recurse with corrected date (safe: nextStr ≤ original dateStr so no infinite loop)
+      onDateChange();
+      return;
+    }
+  }
+  // ── END GUARD ──────────────────────────────────────────────────
+
   const {readings,source,prevDate}=getOpenings(dateStr);
   ALL_NZ.forEach(id=>{
     const el=document.getElementById('o-'+id);if(!el)return;
@@ -1430,25 +1462,45 @@ function clearEntry(){
 // ================================================================
 function renderDash(){
   document.getElementById('dash-date').textContent='Today: '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
-  const yest=YEST();
   const entries=C.entries(),credits=C.credits(),recs=C.recoveries();
-  const ye=entries.find(e=>e.date===yest);
+
+  // Use most recent saved entry (entries are sorted newest-first)
+  const le=entries.length?entries[0]:null;
+  const leDate=le?le.date:null;
+  const yest=YEST();
+  const isYest=leDate===yest;
+  const isToday=leDate===TODAY();
+
   const bar=document.getElementById('dash-bar');
-  if(ye) bar.innerHTML=`<span class="pill-info">📊 Yesterday: ${DS(yest)}</span>`;
-  else   bar.innerHTML=`<span class="pill-warn">No entry for yesterday (${DS(yest)})</span>`;
+  if(le){
+    const label=isToday?'Today':isYest?'Yesterday':DS(leDate);
+    bar.innerHTML=`<span class="pill-info">📊 Showing: ${label} (${DS(leDate)})</span>`;
+  } else {
+    bar.innerHTML=`<span class="pill-warn">No entries yet. Go to Daily Entry to add.</span>`;
+  }
+
   let rev=0,cash=0,exp=0;
-  if(ye){rev=ye.msA+ye.hsdA+ye.powA;cash=(ye.cash1||0)+(ye.cash2||0)+(ye.cash3||0)+(ye.paytm||0)+(ye.bankTransfer||0)+(ye.hpPay||0)+(ye.ccms||0);exp=ye.expenses.reduce((s,e)=>s+e.amount,0);}
+  if(le){
+    rev=le.msA+le.hsdA+le.powA;
+    cash=(le.cash1||0)+(le.cash2||0)+(le.cash3||0)+(le.paytm||0)+(le.bankTransfer||0)+(le.hpPay||0)+(le.ccms||0);
+    exp=le.expenses.reduce((s,e)=>s+e.amount,0);
+  }
   const totC=credits.reduce((s,c)=>s+c.amount,0);const totR=recs.reduce((s,r)=>s+r.amount,0);
   document.getElementById('dash-rev').textContent=fmt(rev);
   document.getElementById('dash-cash').textContent=fmt(cash);
   document.getElementById('dash-cred').textContent=fmt(Math.max(0,totC-totR));
   document.getElementById('dash-exp').textContent=fmt(exp);
+  // Update card sub-labels to show the date
+  const dateLbl=leDate?DS(leDate):'—';
+  const rsEl=document.getElementById('dash-rev-sub');if(rsEl)rsEl.textContent=dateLbl;
+  const esEl=document.getElementById('dash-exp-sub');if(esEl)esEl.textContent=dateLbl;
+
   const fEl=document.getElementById('dash-fuel-bars');
-  if(ye&&(ye.msV||ye.hsdV||ye.powV)){
-    const fuels=[{n:'MS',c:'var(--c-ms)',v:ye.msV,a:ye.msA},{n:'HSD',c:'var(--c-hsd)',v:ye.hsdV,a:ye.hsdA},{n:'Power',c:'var(--c-pow)',v:ye.powV,a:ye.powA}];
+  if(le&&(le.msV||le.hsdV||le.powV)){
+    const fuels=[{n:'MS',c:'var(--c-ms)',v:le.msV,a:le.msA},{n:'HSD',c:'var(--c-hsd)',v:le.hsdV,a:le.hsdA},{n:'Power',c:'var(--c-pow)',v:le.powV,a:le.powA}];
     const mx=Math.max(...fuels.map(f=>f.v),1);
     fEl.innerHTML=fuels.map(f=>`<div class="fbar"><div class="fbar-lbl"><span style="color:${f.c};font-weight:600;">${f.n}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);">${fmtV(f.v)} L · ${fmt(f.a)}</span></div><div class="fbar-track"><div class="fbar-fill" style="width:${(f.v/mx*100).toFixed(1)}%;background:${f.c};"></div></div></div>`).join('');
-  } else fEl.innerHTML='<div class="empty"><p>No fuel data for yesterday</p></div>';
+  } else fEl.innerHTML='<div class="empty"><p>No fuel data</p></div>';
 
   // Stock
   const stkH=C.stkHist();const latest=stkH.length?stkH[0]:null;
@@ -1469,8 +1521,9 @@ function renderDash(){
   if(!l7.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><p>No records</p></div></td></tr>';return;}
   tb.innerHTML=l7.map(e=>{
     const rev=e.msA+e.hsdA+e.powA,exp=e.expenses.reduce((s,x)=>s+x.amount,0);
-    return `<tr style="${e.date===yest?'background:rgba(245,166,35,.05);':''}">
-      <td style="white-space:nowrap;">${DS(e.date)}</td>
+    const isLatest=e.date===leDate;
+    return `<tr style="${isLatest?'background:rgba(245,166,35,.05);':''}">
+      <td style="white-space:nowrap;">${DS(e.date)}${isLatest?' <span class="badge b-hsd" style="font-size:9px;">latest</span>':''}</td>
       <td style="color:var(--accent);font-weight:600;">${fmt(rev)}</td>
       <td style="color:var(--red);">${fmt(exp)}</td>
       <td style="color:${rev-exp>=0?'var(--green)':'var(--red)'};font-weight:600;">${fmt(rev-exp)}</td>
