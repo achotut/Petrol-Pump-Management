@@ -619,7 +619,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
 
 <!-- SETTINGS -->
 <div id="page-settings" class="page">
-  <div class="page-hdr"><div class="page-title">Settings</div><div class="page-sub">Pump, rates, employees, bootstrap</div></div>
+  <div class="page-hdr"><div class="page-title">Settings</div><div class="page-sub">Pump info, rates, employees and previous entry editor</div></div>
   <div class="sbox">
     <div class="sbox-title">Pump Info</div>
     <div class="fg"><label>Pump Name</label><input type="text" id="s-name"></div>
@@ -636,17 +636,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
       <div class="fg"><label style="color:var(--c-hsd);">HSD</label><input type="number" inputmode="decimal" id="s-hsd-rate" step="0.01"></div>
       <div class="fg"><label style="color:var(--c-pow);">Power</label><input type="number" inputmode="decimal" id="s-pow-rate" step="0.01"></div>
     </div>
-  </div>
-  <div class="sbox">
-    <div class="sbox-title">Bootstrap Meter Readings <span style="font-size:11px;color:var(--text3);font-weight:400;">— First entry only</span></div>
-    <p class="sbox-sub">Set the very first opening readings. After first save, openings carry forward automatically.</p>
-    <div style="font-size:11.5px;font-weight:600;color:var(--c-ms);margin-bottom:8px;">MS Petrol</div>
-    <div class="frow"><div class="fg"><label>MS1</label><input type="number" inputmode="decimal" id="s-ms1" step="0.001" placeholder="449271.370"></div><div class="fg"><label>MS2</label><input type="number" inputmode="decimal" id="s-ms2" step="0.001" placeholder="1143407.539"></div></div>
-    <div class="frow"><div class="fg"><label>MS3</label><input type="number" inputmode="decimal" id="s-ms3" step="0.001" placeholder="1018438.352"></div><div class="fg"><label>MS4</label><input type="number" inputmode="decimal" id="s-ms4" step="0.001" placeholder="383261.900"></div></div>
-    <div style="font-size:11.5px;font-weight:600;color:var(--c-hsd);margin:10px 0 8px;">HSD Diesel</div>
-    <div class="frow"><div class="fg"><label>HSD1</label><input type="number" inputmode="decimal" id="s-hsd1" step="0.001" placeholder="269263.225"></div><div class="fg"><label>HSD2</label><input type="number" inputmode="decimal" id="s-hsd2" step="0.001" placeholder="520784.440"></div></div>
-    <div style="font-size:11.5px;font-weight:600;color:var(--c-pow);margin:10px 0 8px;">Power Premium</div>
-    <div class="frow"><div class="fg"><label>POW1</label><input type="number" inputmode="decimal" id="s-pow1" step="0.001" placeholder="243640.225"></div><div class="fg"><label>POW2</label><input type="number" inputmode="decimal" id="s-pow2" step="0.001" placeholder="86041.485"></div></div>
   </div>
   <div class="sbox">
     <div class="sbox-title">Tank Capacity (L)</div>
@@ -922,7 +911,7 @@ async function sb(table, method='GET', body=null, query=''){
 const C = {
   get: k=>{ try{return JSON.parse(localStorage.getItem('ff4_'+k))||null;}catch{return null;} },
   set: (k,v)=>localStorage.setItem('ff4_'+k,JSON.stringify(v)),
-  settings:    ()=>C.get('settings')||{pumpName:'Mahalaxmi Petrol Pump',city:'Nagpur',msRate:0,hsdRate:0,powRate:0,msCap:20000,hsdCap:20000,powCap:5000,ms1:0,ms2:0,ms3:0,ms4:0,hsd1:0,hsd2:0,pow1:0,pow2:0,employees:[]},
+  settings:    ()=>C.get('settings')||{pumpName:'Mahalaxmi Petrol Pump',city:'Nagpur',msRate:0,hsdRate:0,powRate:0,msCap:20000,hsdCap:20000,powCap:5000,employees:[]},
   entries:     ()=>C.get('entries')||[],
   credits:     ()=>C.get('credits')||[],
   recoveries:  ()=>C.get('recoveries')||[],
@@ -964,7 +953,7 @@ async function syncNow(){
       sb('employees','GET',null,'?select=*&order=created_at.asc'),
     ]);
 
-    // Merge remote settings with local (remote wins for pump fields, local wins for bootstrap/employees)
+    // Merge remote settings with local (remote wins for pump fields)
     if(settings&&settings[0]){
       const remote=settings[0];
       const local=C.settings();
@@ -980,14 +969,6 @@ async function syncNow(){
         msCap:parseFloat(remote.ms_cap)||local.msCap,
         hsdCap:parseFloat(remote.hsd_cap)||local.hsdCap,
         powCap:parseFloat(remote.pow_cap)||local.powCap,
-        ms1:parseFloat(remote.ms1)||local.ms1,
-        ms2:parseFloat(remote.ms2)||local.ms2,
-        ms3:parseFloat(remote.ms3)||local.ms3,
-        ms4:parseFloat(remote.ms4)||local.ms4,
-        hsd1:parseFloat(remote.hsd1)||local.hsd1,
-        hsd2:parseFloat(remote.hsd2)||local.hsd2,
-        pow1:parseFloat(remote.pow1)||local.pow1,
-        pow2:parseFloat(remote.pow2)||local.pow2,
         settingsId:remote.id,
       };
       // Merge employees from both sources
@@ -1100,7 +1081,7 @@ function closeMore(){
 }
 
 // ================================================================
-// OPENING READINGS
+// OPENING READINGS — always previous day's closing, no bootstrap
 // ================================================================
 function getOpenings(dateStr){
   const entries=C.entries();
@@ -1109,12 +1090,9 @@ function getOpenings(dateStr){
     const r={};ALL_NZ.forEach(id=>{ r[id]=prev.nozzles[id]?.close??0; });
     return{readings:r,source:'prev',prevDate:prev.date};
   }
-  const s=C.settings();const r={};
-  ALL_NZ.forEach(id=>{ r[id]=s[id.toLowerCase().replace('hsd','hsd').replace('ms','ms').replace('pow','pow')]||0; });
-  // Map settings key names
-  r['MS1']=s.ms1||0;r['MS2']=s.ms2||0;r['MS3']=s.ms3||0;r['MS4']=s.ms4||0;
-  r['HSD1']=s.hsd1||0;r['HSD2']=s.hsd2||0;r['POW1']=s.pow1||0;r['POW2']=s.pow2||0;
-  return{readings:r,source:'bootstrap'};
+  // No previous entry at all — return zeros (brand new system with no data)
+  const r={};ALL_NZ.forEach(id=>{ r[id]=0; });
+  return{readings:r,source:'none'};
 }
 
 // ================================================================
@@ -1139,7 +1117,21 @@ function initEntry(){
   document.getElementById('r-ms').value=s.msRate||0;
   document.getElementById('r-hsd').value=s.hsdRate||0;
   document.getElementById('r-pow').value=s.powRate||0;
-  if(!document.getElementById('e-date').value) document.getElementById('e-date').value=TODAY();
+
+  // Always set the date to the next expected entry (last saved + 1 day),
+  // capped at today. This ensures the picker always opens on the right date.
+  const entries=C.entries();
+  let defaultDate=TODAY();
+  if(entries.length>0){
+    const lastSaved=entries[0].date;
+    const next=new Date(lastSaved+'T00:00:00');
+    next.setDate(next.getDate()+1);
+    const nextStr=next.toISOString().slice(0,10);
+    // Use the next expected date, but never a future date
+    defaultDate=nextStr<=TODAY()?nextStr:TODAY();
+  }
+  document.getElementById('e-date').value=defaultDate;
+
   // credit datalist
   const dl=document.getElementById('cr-dl');dl.innerHTML='';
   [...new Set(C.credits().map(c=>c.customer))].forEach(c=>{const o=document.createElement('option');o.value=c;dl.appendChild(o);});
@@ -1159,31 +1151,25 @@ function onDateChange(){
   const dateStr=document.getElementById('e-date').value;if(!dateStr)return;
 
   // ── SEQUENTIAL DATE GUARD ──────────────────────────────────────
-  // Find the most recent saved entry. If there is a gap between that
-  // entry and the selected date (i.e. at least one unsaved day in between),
-  // block the user and point them to the missing date.
-  const entries=C.entries(); // already sorted newest-first
-  const existing=entries.find(e=>e.date===dateStr); // allow re-opening saved dates
+  // Block selecting a date that skips over an unsaved day.
+  // Allowed: re-opening any already-saved date, or selecting the
+  // next date immediately after the last saved entry.
+  const entries=C.entries(); // sorted newest-first
+  const existing=entries.find(e=>e.date===dateStr);
   if(!existing && entries.length>0){
-    const lastSaved=entries[0].date; // newest saved date (YYYY-MM-DD)
-    // Compute the NEXT expected date after lastSaved
+    const lastSaved=entries[0].date;
     const nextExpected=new Date(lastSaved+'T00:00:00');
     nextExpected.setDate(nextExpected.getDate()+1);
     const nextStr=nextExpected.toISOString().slice(0,10);
-    // If selected date is AFTER the next expected date → gap exists
+    // Only block if there is a GAP — selected date is strictly beyond next expected
     if(dateStr>nextStr){
-      // Reset the date picker back to the next expected date
       document.getElementById('e-date').value=nextStr;
-      // Show blocking message
-      const st=document.getElementById('e-status');
-      st.innerHTML=`<span class="pill-warn" style="font-size:12.5px;line-height:1.5;">
+      document.getElementById('e-status').innerHTML=`<span class="pill-warn" style="line-height:1.6;">
         ⚠ Please enter data for <b>${DS(nextStr)}</b> first.<br>
-        <span style="font-size:11px;opacity:.8;">You cannot skip dates. Last saved entry: ${DS(lastSaved)}.</span>
+        <span style="font-size:11px;opacity:.8;">Last saved: ${DS(lastSaved)}. You cannot skip dates.</span>
       </span>`;
-      // Clear any stale field values and re-trigger with the corrected date
-      clearEntry();
-      // Recurse with corrected date (safe: nextStr ≤ original dateStr so no infinite loop)
-      onDateChange();
+      // Load the next expected date without recursing
+      setTimeout(()=>onDateChange(),0);
       return;
     }
   }
@@ -1195,8 +1181,8 @@ function onDateChange(){
     const v=readings[id]||0;el.textContent=v>0?fmtV(v):'0.000';el.className=v>0?'vg':'vm';
   });
   const st=document.getElementById('e-status');
-  if(source==='prev') st.innerHTML=`<span class="pill-ok">✓ From ${DS(prevDate)}</span>`;
-  else st.innerHTML=`<span class="pill-warn">⚠ Bootstrap readings</span>`;
+  if(source==='prev') st.innerHTML=`<span class="pill-ok">✓ Openings from ${DS(prevDate)} closing</span>`;
+  else st.innerHTML=`<span class="pill-warn">⚠ No previous entry found — please check opening readings</span>`;
   ['ms','hsd','pow'].forEach(f=>NOZZLES[f].forEach(id=>calcNz(id,f)));
   // Load existing
   const ex=C.entries().find(e=>e.date===dateStr);
@@ -1774,7 +1760,6 @@ function loadSettings(){
   document.getElementById('s-ms-rate').value=s.msRate||'';
   document.getElementById('s-hsd-rate').value=s.hsdRate||'';
   document.getElementById('s-pow-rate').value=s.powRate||'';
-  ['ms1','ms2','ms3','ms4','hsd1','hsd2','pow1','pow2'].forEach(k=>{const el=document.getElementById('s-'+k);if(el)el.value=s[k]||'';});
   document.getElementById('s-ms-cap').value=s.msCap||'';
   document.getElementById('s-hsd-cap').value=s.hsdCap||'';
   document.getElementById('s-pow-cap').value=s.powCap||'';
@@ -1792,21 +1777,12 @@ async function saveSettings(){
     msCap:parseFloat(document.getElementById('s-ms-cap').value)||20000,
     hsdCap:parseFloat(document.getElementById('s-hsd-cap').value)||20000,
     powCap:parseFloat(document.getElementById('s-pow-cap').value)||5000,
-    ms1:parseFloat(document.getElementById('s-ms1').value)||0,
-    ms2:parseFloat(document.getElementById('s-ms2').value)||0,
-    ms3:parseFloat(document.getElementById('s-ms3').value)||0,
-    ms4:parseFloat(document.getElementById('s-ms4').value)||0,
-    hsd1:parseFloat(document.getElementById('s-hsd1').value)||0,
-    hsd2:parseFloat(document.getElementById('s-hsd2').value)||0,
-    pow1:parseFloat(document.getElementById('s-pow1').value)||0,
-    pow2:parseFloat(document.getElementById('s-pow2').value)||0,
     employees:(C.settings().employees||[]),
     settingsId:(C.settings().settingsId||null),
   };
   C.set('settings',s);
-  // Push to Supabase
   try{
-    const row={pump_name:s.pumpName,owner:s.owner,city:s.city,phone:s.phone,ms_rate:s.msRate,hsd_rate:s.hsdRate,pow_rate:s.powRate,ms_cap:s.msCap,hsd_cap:s.hsdCap,pow_cap:s.powCap,ms1:s.ms1,ms2:s.ms2,ms3:s.ms3,ms4:s.ms4,hsd1:s.hsd1,hsd2:s.hsd2,pow1:s.pow1,pow2:s.pow2,updated_at:new Date().toISOString()};
+    const row={pump_name:s.pumpName,owner:s.owner,city:s.city,phone:s.phone,ms_rate:s.msRate,hsd_rate:s.hsdRate,pow_rate:s.powRate,ms_cap:s.msCap,hsd_cap:s.hsdCap,pow_cap:s.powCap,updated_at:new Date().toISOString()};
     if(s.settingsId) await sb('settings','PATCH',row,`?id=eq.${s.settingsId}`);
     else await sb('settings','POST',row);
     toast('✅ Settings saved!');
