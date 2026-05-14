@@ -1034,8 +1034,9 @@ const ALL_NZ=['MS1','MS2','MS3','MS4','HSD1','HSD2','POW1','POW2'];
 const fmt  = n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtV = n=>Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:3,maximumFractionDigits:3});
 const fmtV2= n=>Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-const TODAY= ()=>new Date().toISOString().slice(0,10);
-const YEST = ()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);};
+const TODAY= ()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const YEST = ()=>{const d=new Date();d.setDate(d.getDate()-1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const ADDDAY = d=>{const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+1);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;}
 const DS   = d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 const inR  = (d,f,t)=>(!f||d>=f)&&(!t||d<=t);
 
@@ -1118,18 +1119,16 @@ function initEntry(){
   document.getElementById('r-hsd').value=s.hsdRate||0;
   document.getElementById('r-pow').value=s.powRate||0;
 
-  // Always set the date to the next expected entry (last saved + 1 day),
-  // capped at today. This ensures the picker always opens on the right date.
+  // Work out which date to open on:
+  // → next unsaved date after the last saved entry, capped at today
   const entries=C.entries();
   let defaultDate=TODAY();
   if(entries.length>0){
-    const lastSaved=entries[0].date;
-    const next=new Date(lastSaved+'T00:00:00');
-    next.setDate(next.getDate()+1);
-    const nextStr=next.toISOString().slice(0,10);
-    // Use the next expected date, but never a future date
+    const nextStr=ADDDAY(entries[0].date);  // last saved + 1 day
     defaultDate=nextStr<=TODAY()?nextStr:TODAY();
   }
+  // Always reset the date input to the correct value (clears any stale DOM state)
+  document.getElementById('e-date').value='';
   document.getElementById('e-date').value=defaultDate;
 
   // credit datalist
@@ -1151,26 +1150,23 @@ function onDateChange(){
   const dateStr=document.getElementById('e-date').value;if(!dateStr)return;
 
   // ── SEQUENTIAL DATE GUARD ──────────────────────────────────────
-  // Block selecting a date that skips over an unsaved day.
-  // Allowed: re-opening any already-saved date, or selecting the
-  // next date immediately after the last saved entry.
-  const entries=C.entries(); // sorted newest-first
-  const existing=entries.find(e=>e.date===dateStr);
-  if(!existing && entries.length>0){
-    const lastSaved=entries[0].date;
-    const nextExpected=new Date(lastSaved+'T00:00:00');
-    nextExpected.setDate(nextExpected.getDate()+1);
-    const nextStr=nextExpected.toISOString().slice(0,10);
-    // Only block if there is a GAP — selected date is strictly beyond next expected
-    if(dateStr>nextStr){
-      document.getElementById('e-date').value=nextStr;
-      document.getElementById('e-status').innerHTML=`<span class="pill-warn" style="line-height:1.6;">
-        ⚠ Please enter data for <b>${DS(nextStr)}</b> first.<br>
-        <span style="font-size:11px;opacity:.8;">Last saved: ${DS(lastSaved)}. You cannot skip dates.</span>
-      </span>`;
-      // Load the next expected date without recursing
-      setTimeout(()=>onDateChange(),0);
-      return;
+  // Allow: any already-saved date (edit), OR exactly the next date after last saved.
+  // Block: anything that would skip an unsaved day.
+  const entries=C.entries();
+  if(entries.length>0){
+    const existing=entries.find(e=>e.date===dateStr);
+    if(!existing){
+      const nextAllowed=ADDDAY(entries[0].date); // last saved + 1 day
+      if(dateStr>nextAllowed){
+        // Snap back to the correct next date
+        document.getElementById('e-date').value=nextAllowed;
+        document.getElementById('e-status').innerHTML=`<span class="pill-warn" style="line-height:1.6;">
+          ⚠ Please enter data for <b>${DS(nextAllowed)}</b> first.<br>
+          <span style="font-size:11px;opacity:.8;">Last saved: ${DS(entries[0].date)}. Cannot skip dates.</span>
+        </span>`;
+        setTimeout(()=>onDateChange(),0);
+        return;
+      }
     }
   }
   // ── END GUARD ──────────────────────────────────────────────────
