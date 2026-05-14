@@ -41,14 +41,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* ── SCROLL AREA ── */
-.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 0 calc(var(--nav-h)+16px) 0;}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 0 calc(var(--nav-h) + env(safe-area-inset-bottom) + 32px) 0;}
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:540px;
   background:var(--surf);border-top:1px solid var(--border);
-  display:flex;height:var(--nav-h);z-index:100;
+  display:flex;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  z-index:100;
 }
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;
@@ -63,7 +65,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 /* ── MORE MENU (overlay) ── */
 .more-menu{
-  position:fixed;bottom:calc(var(--nav-h));left:50%;transform:translateX(-50%);
+  position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   width:100%;max-width:540px;
   background:var(--surf);border-top:1px solid var(--border);
   z-index:99;padding:12px;
@@ -497,7 +499,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     <div class="fg"><label>Customer</label><select id="rec-cust"><option value="">Select...</option></select></div>
     <div class="frow">
       <div class="fg"><label>Date</label><input type="date" id="rec-date"></div>
-      <div class="fg"><label>Amount (₹)</label><input type="number" id="rec-amt" placeholder="0.00"></div>
+      <div class="fg"><label>Amount (₹)</label><input type="number" inputmode="decimal" id="rec-amt" placeholder="0.00"></div>
     </div>
     <div class="fg"><label>Mode</label><select id="rec-mode"><option>Cash</option><option>Paytm</option><option>Bank Transfer</option><option>Cheque</option></select></div>
     <div class="fg"><label>Notes</label><input type="text" id="rec-notes"></div>
@@ -547,7 +549,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     <div class="fg"><label>Employee</label><select id="settle-emp"><option value="">Select...</option></select></div>
     <div class="frow">
       <div class="fg"><label>Date</label><input type="date" id="settle-date"></div>
-      <div class="fg"><label>Amount (₹)</label><input type="number" id="settle-amt" placeholder="0.00"></div>
+      <div class="fg"><label>Amount (₹)</label><input type="number" inputmode="decimal" id="settle-amt" placeholder="0.00"></div>
     </div>
     <div class="fg"><label>Mode</label><select id="settle-mode"><option>Salary Deduction</option><option>Cash Return</option><option>Other</option></select></div>
     <div class="fg"><label>Notes</label><input type="text" id="settle-notes"></div>
@@ -574,9 +576,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
       <div class="sbox-title">Record Dip Measurement</div>
       <div class="fg"><label>Date</label><input type="date" id="stk-date"></div>
       <div class="frow3">
-        <div class="fg"><label style="color:var(--c-ms);">MS (L)</label><input type="number" id="upd-ms" step="0.001"></div>
-        <div class="fg"><label style="color:var(--c-hsd);">HSD (L)</label><input type="number" id="upd-hsd" step="0.001"></div>
-        <div class="fg"><label style="color:var(--c-pow);">Power (L)</label><input type="number" id="upd-pow" step="0.001"></div>
+        <div class="fg"><label style="color:var(--c-ms);">MS (L)</label><input type="number" inputmode="decimal" id="upd-ms" step="0.001"></div>
+        <div class="fg"><label style="color:var(--c-hsd);">HSD (L)</label><input type="number" inputmode="decimal" id="upd-hsd" step="0.001"></div>
+        <div class="fg"><label style="color:var(--c-pow);">Power (L)</label><input type="number" inputmode="decimal" id="upd-pow" step="0.001"></div>
       </div>
       <div class="fg"><label>Notes</label><input type="text" id="upd-notes" placeholder="Optional..."></div>
       <button class="btn btn-primary" onclick="saveStock()">Save Measurement</button>
@@ -630,28 +632,28 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
   <div class="sbox">
     <div class="sbox-title">Fuel Rates (₹/L)</div>
     <div class="frow3">
-      <div class="fg"><label style="color:var(--c-ms);">MS</label><input type="number" id="s-ms-rate" step="0.01"></div>
-      <div class="fg"><label style="color:var(--c-hsd);">HSD</label><input type="number" id="s-hsd-rate" step="0.01"></div>
-      <div class="fg"><label style="color:var(--c-pow);">Power</label><input type="number" id="s-pow-rate" step="0.01"></div>
+      <div class="fg"><label style="color:var(--c-ms);">MS</label><input type="number" inputmode="decimal" id="s-ms-rate" step="0.01"></div>
+      <div class="fg"><label style="color:var(--c-hsd);">HSD</label><input type="number" inputmode="decimal" id="s-hsd-rate" step="0.01"></div>
+      <div class="fg"><label style="color:var(--c-pow);">Power</label><input type="number" inputmode="decimal" id="s-pow-rate" step="0.01"></div>
     </div>
   </div>
   <div class="sbox">
     <div class="sbox-title">Bootstrap Meter Readings <span style="font-size:11px;color:var(--text3);font-weight:400;">— First entry only</span></div>
     <p class="sbox-sub">Set the very first opening readings. After first save, openings carry forward automatically.</p>
     <div style="font-size:11.5px;font-weight:600;color:var(--c-ms);margin-bottom:8px;">MS Petrol</div>
-    <div class="frow"><div class="fg"><label>MS1</label><input type="number" id="s-ms1" step="0.001" placeholder="449271.370"></div><div class="fg"><label>MS2</label><input type="number" id="s-ms2" step="0.001" placeholder="1143407.539"></div></div>
-    <div class="frow"><div class="fg"><label>MS3</label><input type="number" id="s-ms3" step="0.001" placeholder="1018438.352"></div><div class="fg"><label>MS4</label><input type="number" id="s-ms4" step="0.001" placeholder="383261.900"></div></div>
+    <div class="frow"><div class="fg"><label>MS1</label><input type="number" inputmode="decimal" id="s-ms1" step="0.001" placeholder="449271.370"></div><div class="fg"><label>MS2</label><input type="number" inputmode="decimal" id="s-ms2" step="0.001" placeholder="1143407.539"></div></div>
+    <div class="frow"><div class="fg"><label>MS3</label><input type="number" inputmode="decimal" id="s-ms3" step="0.001" placeholder="1018438.352"></div><div class="fg"><label>MS4</label><input type="number" inputmode="decimal" id="s-ms4" step="0.001" placeholder="383261.900"></div></div>
     <div style="font-size:11.5px;font-weight:600;color:var(--c-hsd);margin:10px 0 8px;">HSD Diesel</div>
-    <div class="frow"><div class="fg"><label>HSD1</label><input type="number" id="s-hsd1" step="0.001" placeholder="269263.225"></div><div class="fg"><label>HSD2</label><input type="number" id="s-hsd2" step="0.001" placeholder="520784.440"></div></div>
+    <div class="frow"><div class="fg"><label>HSD1</label><input type="number" inputmode="decimal" id="s-hsd1" step="0.001" placeholder="269263.225"></div><div class="fg"><label>HSD2</label><input type="number" inputmode="decimal" id="s-hsd2" step="0.001" placeholder="520784.440"></div></div>
     <div style="font-size:11.5px;font-weight:600;color:var(--c-pow);margin:10px 0 8px;">Power Premium</div>
-    <div class="frow"><div class="fg"><label>POW1</label><input type="number" id="s-pow1" step="0.001" placeholder="243640.225"></div><div class="fg"><label>POW2</label><input type="number" id="s-pow2" step="0.001" placeholder="86041.485"></div></div>
+    <div class="frow"><div class="fg"><label>POW1</label><input type="number" inputmode="decimal" id="s-pow1" step="0.001" placeholder="243640.225"></div><div class="fg"><label>POW2</label><input type="number" inputmode="decimal" id="s-pow2" step="0.001" placeholder="86041.485"></div></div>
   </div>
   <div class="sbox">
     <div class="sbox-title">Tank Capacity (L)</div>
     <div class="frow3">
-      <div class="fg"><label style="color:var(--c-ms);">MS</label><input type="number" id="s-ms-cap"></div>
-      <div class="fg"><label style="color:var(--c-hsd);">HSD</label><input type="number" id="s-hsd-cap"></div>
-      <div class="fg"><label style="color:var(--c-pow);">Power</label><input type="number" id="s-pow-cap"></div>
+      <div class="fg"><label style="color:var(--c-ms);">MS</label><input type="number" inputmode="decimal" id="s-ms-cap"></div>
+      <div class="fg"><label style="color:var(--c-hsd);">HSD</label><input type="number" inputmode="decimal" id="s-hsd-cap"></div>
+      <div class="fg"><label style="color:var(--c-pow);">Power</label><input type="number" inputmode="decimal" id="s-pow-cap"></div>
     </div>
   </div>
   <div class="sbox">
@@ -663,6 +665,113 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);}
     <button class="btn btn-ghost" onclick="addEmployee()" style="margin-bottom:10px;">+ Add Employee</button>
     <div id="emp-settings-list"></div>
   </div>
+
+  <!-- EDIT PREVIOUS ENTRIES -->
+  <div class="sbox">
+    <div class="sbox-title"><div class="pill" style="background:var(--accent)"></div>Edit Previous Entry</div>
+    <p class="sbox-sub">Load any saved day to edit meter readings, testing, cash collection, expenses, and salary/advances.</p>
+    <div class="frow" style="align-items:flex-end;gap:10px;">
+      <div class="fg" style="flex:1;"><label>Select Date</label><input type="date" id="edit-date"></div>
+      <button class="btn btn-ghost" style="width:auto;padding:11px 16px;flex-shrink:0;" onclick="loadEntryForEdit()">Load</button>
+    </div>
+    <div id="edit-status" style="margin-top:8px;"></div>
+  </div>
+
+  <!-- Edit form — hidden until a date is loaded -->
+  <div id="edit-form" style="display:none;">
+
+    <!-- Meter readings -->
+    <div class="sbox">
+      <div class="sbox-title"><div class="pill" style="background:var(--c-ms)"></div>Nozzle Closing Readings</div>
+      <p class="sbox-sub">Change closing meter readings. Opening values are fixed (carried from previous day).</p>
+
+      <div style="font-size:11.5px;font-weight:600;color:var(--c-ms);margin-bottom:8px;">MS Petrol</div>
+      <div class="frow">
+        <div class="fg"><label>MS1 Close</label><input type="number" inputmode="decimal" id="ed-MS1" step="0.001"></div>
+        <div class="fg"><label>MS2 Close</label><input type="number" inputmode="decimal" id="ed-MS2" step="0.001"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>MS3 Close</label><input type="number" inputmode="decimal" id="ed-MS3" step="0.001"></div>
+        <div class="fg"><label>MS4 Close</label><input type="number" inputmode="decimal" id="ed-MS4" step="0.001"></div>
+      </div>
+
+      <div style="font-size:11.5px;font-weight:600;color:var(--c-hsd);margin:12px 0 8px;">HSD Diesel</div>
+      <div class="frow">
+        <div class="fg"><label>HSD1 Close</label><input type="number" inputmode="decimal" id="ed-HSD1" step="0.001"></div>
+        <div class="fg"><label>HSD2 Close</label><input type="number" inputmode="decimal" id="ed-HSD2" step="0.001"></div>
+      </div>
+
+      <div style="font-size:11.5px;font-weight:600;color:var(--c-pow);margin:12px 0 8px;">Power Premium</div>
+      <div class="frow">
+        <div class="fg"><label>POW1 Close</label><input type="number" inputmode="decimal" id="ed-POW1" step="0.001"></div>
+        <div class="fg"><label>POW2 Close</label><input type="number" inputmode="decimal" id="ed-POW2" step="0.001"></div>
+      </div>
+    </div>
+
+    <!-- Testing -->
+    <div class="sbox">
+      <div class="sbox-title"><div class="pill" style="background:var(--blue)"></div>Testing Deductions</div>
+      <div class="frow3">
+        <div class="fg"><label style="color:var(--c-ms);">MS (L)</label><input type="number" inputmode="decimal" id="ed-test-ms" step="0.001"></div>
+        <div class="fg"><label style="color:var(--c-hsd);">HSD (L)</label><input type="number" inputmode="decimal" id="ed-test-hsd" step="0.001"></div>
+        <div class="fg"><label style="color:var(--c-pow);">Power (L)</label><input type="number" inputmode="decimal" id="ed-test-pow" step="0.001"></div>
+      </div>
+    </div>
+
+    <!-- Cash & Collection -->
+    <div class="sbox">
+      <div class="sbox-title"><div class="pill" style="background:var(--green)"></div>Cash &amp; Collection</div>
+      <div class="frow">
+        <div class="fg"><label>Cash Part 1 (₹)</label><input type="number" inputmode="decimal" id="ed-cash1" step="0.01"></div>
+        <div class="fg"><label>Cash Part 2 (₹)</label><input type="number" inputmode="decimal" id="ed-cash2" step="0.01"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Cash Part 3 (₹)</label><input type="number" inputmode="decimal" id="ed-cash3" step="0.01"></div>
+        <div class="fg"><label>Paytm (₹)</label><input type="number" inputmode="decimal" id="ed-paytm" step="0.01"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Bank Transfer (₹)</label><input type="number" inputmode="decimal" id="ed-bank-transfer" step="0.01"></div>
+        <div class="fg"><label>HP Pay (₹)</label><input type="number" inputmode="decimal" id="ed-hp-pay" step="0.01"></div>
+      </div>
+      <div class="fg"><label>CCMS (₹)</label><input type="number" inputmode="decimal" id="ed-ccms" step="0.01"></div>
+    </div>
+
+    <!-- Expenses (editable list) -->
+    <div class="sbox">
+      <div class="sbox-title"><div class="pill" style="background:var(--red)"></div>Expenses</div>
+      <p class="sbox-sub">Edit or delete existing expenses, or add new ones for this day.</p>
+      <div id="ed-exp-list"></div>
+      <div class="divider"></div>
+      <div style="font-size:11.5px;font-weight:600;color:var(--text2);margin-bottom:8px;">Add New Expense</div>
+      <div class="fg"><label>Category</label>
+        <select id="ed-exp-cat" onchange="onEditExpCat()">
+          <option value="">Select...</option>
+          <optgroup label="— Tanker —"><option>Tanker Diesel</option><option>Tanker Bhatta</option><option>Tanker Expenses</option></optgroup>
+          <optgroup label="— Staff —"><option>Staff Salary</option><option>Advance</option><option>Incentive</option><option>Nashta</option><option>Tiffin</option></optgroup>
+          <optgroup label="— Operations —"><option>Density</option><option>Maintenance</option><option>Cleaning</option><option>Miscellaneous</option><option>Other</option></optgroup>
+        </select>
+      </div>
+      <div class="fg" id="ed-exp-emp-grp" style="display:none;"><label>Employee</label>
+        <select id="ed-exp-emp"><option value="">Select employee...</option></select>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="ed-exp-desc" placeholder="Details..."></div>
+      <div class="fg"><label>Amount (₹)</label><input type="number" inputmode="decimal" id="ed-exp-amt" step="0.01"></div>
+      <button class="btn btn-ghost" onclick="editAddExpense()">+ Add Expense</button>
+    </div>
+
+    <!-- Remarks -->
+    <div class="sbox">
+      <div class="sbox-title"><div class="pill" style="background:var(--text3)"></div>Remarks</div>
+      <div class="fg"><label>Day Remarks</label><input type="text" id="ed-remarks"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="cancelEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedEntry()" id="edit-save-btn">💾 Save Changes</button>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+
   <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
   <div style="height:8px;"></div>
   <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear All Local Data</button>
@@ -1686,6 +1795,205 @@ function clearAll(){
     syncNow().then(renderDash);
   }
 }
+
+// ================================================================
+// EDIT PREVIOUS ENTRIES
+// ================================================================
+let editDate = null;
+let editExpenses = []; // working copy of expenses for the entry being edited
+
+function loadEntryForEdit(){
+  const dateStr = document.getElementById('edit-date').value;
+  if(!dateStr){ toast('Select a date first'); return; }
+  const entry = C.entries().find(e => e.date === dateStr);
+  const statusEl = document.getElementById('edit-status');
+  const formEl = document.getElementById('edit-form');
+
+  if(!entry){
+    statusEl.innerHTML = `<span class="pill-warn">⚠ No entry found for ${DS(dateStr)}. You can only edit saved entries.</span>`;
+    formEl.style.display = 'none';
+    return;
+  }
+
+  editDate = dateStr;
+  editExpenses = [...(entry.expenses || [])]; // local working copy
+
+  statusEl.innerHTML = `<span class="pill-ok">✓ Loaded entry for ${DS(dateStr)}</span>`;
+  formEl.style.display = 'block';
+
+  // Scroll to the form
+  setTimeout(()=>formEl.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+
+  // Fill nozzle closing values
+  const nz = entry.nozzles || {};
+  ['MS1','MS2','MS3','MS4','HSD1','HSD2','POW1','POW2'].forEach(id => {
+    const el = document.getElementById('ed-'+id);
+    if(el) el.value = nz[id]?.close ?? '';
+  });
+
+  // Testing
+  document.getElementById('ed-test-ms').value  = entry.testingMs  || '';
+  document.getElementById('ed-test-hsd').value = entry.testingHsd || '';
+  document.getElementById('ed-test-pow').value = entry.testingPow || '';
+
+  // Cash & collection
+  document.getElementById('ed-cash1').value         = entry.cash1        || '';
+  document.getElementById('ed-cash2').value         = entry.cash2        || '';
+  document.getElementById('ed-cash3').value         = entry.cash3        || '';
+  document.getElementById('ed-paytm').value         = entry.paytm        || '';
+  document.getElementById('ed-bank-transfer').value = entry.bankTransfer || '';
+  document.getElementById('ed-hp-pay').value        = entry.hpPay        || '';
+  document.getElementById('ed-ccms').value          = entry.ccms         || '';
+
+  // Remarks
+  document.getElementById('ed-remarks').value = entry.remarks || '';
+
+  // Populate employee dropdown
+  const s = C.settings();
+  const empSel = document.getElementById('ed-exp-emp');
+  empSel.innerHTML = '<option value="">Select employee...</option>'
+    + (s.employees||[]).map(e=>`<option value="${e.name}">${e.name}${e.role?' ('+e.role+')':''}</option>`).join('');
+
+  renderEditExpenses();
+}
+
+function renderEditExpenses(){
+  const el = document.getElementById('ed-exp-list');
+  if(!editExpenses.length){
+    el.innerHTML = '<div class="empty" style="padding:14px;"><p>No expenses for this day yet.</p></div>';
+    return;
+  }
+  el.innerHTML = editExpenses.map((e,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:12px;color:var(--text2);">${e.category}</div>
+        <div style="font-size:12px;font-weight:600;">${e.description||'—'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'DM Mono',monospace;color:var(--red);font-size:13px;">${fmt(e.amount)}</span>
+        <button class="btn btn-danger btn-sm" onclick="editRemoveExpense(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function editRemoveExpense(i){
+  editExpenses.splice(i,1);
+  renderEditExpenses();
+}
+
+function onEditExpCat(){
+  const v = document.getElementById('ed-exp-cat').value;
+  const g = document.getElementById('ed-exp-emp-grp');
+  if(g) g.style.display = (v==='Advance'||v==='Incentive') ? 'block' : 'none';
+}
+
+function editAddExpense(){
+  const cat  = document.getElementById('ed-exp-cat').value;
+  let   desc = document.getElementById('ed-exp-desc').value.trim();
+  const amt  = parseFloat(document.getElementById('ed-exp-amt').value)||0;
+  if(!cat||!amt){ toast('Select category and enter amount'); return; }
+  if(cat==='Advance'||cat==='Incentive'){
+    const emp = document.getElementById('ed-exp-emp').value;
+    if(!emp){ toast('Select employee'); return; }
+    desc = emp + (desc ? ': '+desc : '');
+  }
+  editExpenses.push({category:cat, description:desc, amount:amt});
+  renderEditExpenses();
+  document.getElementById('ed-exp-cat').value='';
+  document.getElementById('ed-exp-desc').value='';
+  document.getElementById('ed-exp-amt').value='';
+  document.getElementById('ed-exp-emp-grp').style.display='none';
+}
+
+function cancelEdit(){
+  editDate = null;
+  editExpenses = [];
+  document.getElementById('edit-form').style.display='none';
+  document.getElementById('edit-status').innerHTML='';
+  document.getElementById('edit-date').value='';
+}
+
+async function saveEditedEntry(){
+  if(!editDate){ toast('No entry loaded'); return; }
+  const btn = document.getElementById('edit-save-btn');
+  btn.innerHTML='<span class="spinner"></span> Saving…'; btn.disabled=true;
+
+  try{
+    const existingEntry = C.entries().find(e => e.date === editDate);
+    if(!existingEntry){ toast('Entry not found'); return; }
+
+    // Re-compute nozzle volumes from edited closings
+    const openings = getOpenings(editDate);
+    const nozzles  = {};
+    let msV=0,hsdV=0,powV=0,msA=0,hsdA=0,powA=0;
+    const rates = { ms: existingEntry.msRate||0, hsd: existingEntry.hsdRate||0, pow: existingEntry.powRate||0 };
+    const testMs  = parseFloat(document.getElementById('ed-test-ms').value)||0;
+    const testHsd = parseFloat(document.getElementById('ed-test-hsd').value)||0;
+    const testPow = parseFloat(document.getElementById('ed-test-pow').value)||0;
+
+    const fuelMap = { MS1:'ms', MS2:'ms', MS3:'ms', MS4:'ms', HSD1:'hsd', HSD2:'hsd', POW1:'pow', POW2:'pow' };
+    ['MS1','MS2','MS3','MS4','HSD1','HSD2','POW1','POW2'].forEach(id => {
+      const fuel  = fuelMap[id];
+      const open  = openings.readings[id]||0;
+      const close = parseFloat(document.getElementById('ed-'+id)?.value)||existingEntry.nozzles[id]?.close||0;
+      const vol   = (close>0&&close>=open) ? Math.max(0,close-open) : 0;
+      const rate  = rates[fuel];
+      nozzles[id] = {open, close, volume:vol, rate, amount:vol*rate};
+    });
+
+    // Gross per fuel → subtract testing
+    ['MS1','MS2','MS3','MS4'].forEach(id=>{msV+=nozzles[id].volume;});
+    ['HSD1','HSD2'].forEach(id=>{hsdV+=nozzles[id].volume;});
+    ['POW1','POW2'].forEach(id=>{powV+=nozzles[id].volume;});
+    msV  = Math.max(0,msV-testMs);  msA  = msV*rates.ms;
+    hsdV = Math.max(0,hsdV-testHsd);hsdA = hsdV*rates.hsd;
+    powV = Math.max(0,powV-testPow);powA = powV*rates.pow;
+
+    const cash1       = parseFloat(document.getElementById('ed-cash1').value)||0;
+    const cash2       = parseFloat(document.getElementById('ed-cash2').value)||0;
+    const cash3       = parseFloat(document.getElementById('ed-cash3').value)||0;
+    const paytm       = parseFloat(document.getElementById('ed-paytm').value)||0;
+    const bankTransfer= parseFloat(document.getElementById('ed-bank-transfer').value)||0;
+    const hpPay       = parseFloat(document.getElementById('ed-hp-pay').value)||0;
+    const ccms        = parseFloat(document.getElementById('ed-ccms').value)||0;
+    const remarks     = document.getElementById('ed-remarks').value;
+
+    const creditGiven = existingEntry.creditGiven || 0;
+
+    // Update Supabase daily_entries
+    const entryRow = {
+      nozzles, testing_ms:testMs, testing_hsd:testHsd, testing_pow:testPow,
+      ms_vol:msV, hsd_vol:hsdV, pow_vol:powV,
+      ms_amt:msA, hsd_amt:hsdA, pow_amt:powA,
+      cash1, cash2, cash3, paytm, bank_transfer:bankTransfer, hp_pay:hpPay, ccms,
+      credit_given:creditGiven, remarks, updated_at:new Date().toISOString(),
+    };
+    await sb('daily_entries','PATCH',entryRow,`?entry_date=eq.${editDate}`);
+
+    // Replace expenses for this date
+    await sb('expenses','DELETE',null,`?entry_date=eq.${editDate}`);
+    if(editExpenses.length){
+      await sb('expenses','POST', editExpenses.map(e=>({entry_date:editDate, category:e.category, description:e.description, amount:e.amount})));
+    }
+
+    // Rebuild advance records from edited expenses
+    await sb('employee_advances','DELETE',null,`?advance_date=eq.${editDate}`);
+    const advRows = editExpenses.filter(e=>e.category==='Advance'||e.category==='Incentive').map(e=>({
+      advance_date:editDate, employee_name:e.description.split(':')[0].trim(), amount:e.amount, notes:e.description
+    }));
+    if(advRows.length) await sb('employee_advances','POST',advRows);
+
+    toast('✅ Entry updated!');
+    await syncNow();
+    cancelEdit();
+  } catch(err){
+    console.error(err); toast('⚠ Save failed: '+err.message);
+  } finally{
+    btn.innerHTML='💾 Save Changes'; btn.disabled=false;
+  }
+}
+
+
 
 // ================================================================
 // INIT
