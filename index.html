@@ -1150,23 +1150,37 @@ function onDateChange(){
   const dateStr=document.getElementById('e-date').value;if(!dateStr)return;
 
   // ── SEQUENTIAL DATE GUARD ──────────────────────────────────────
-  // Allow: any already-saved date (edit), OR exactly the next date after last saved.
-  // Block: anything that would skip an unsaved day.
   const entries=C.entries();
   if(entries.length>0){
     const existing=entries.find(e=>e.date===dateStr);
-    if(!existing){
-      const nextAllowed=ADDDAY(entries[0].date); // last saved + 1 day
-      if(dateStr>nextAllowed){
-        // Snap back to the correct next date
-        document.getElementById('e-date').value=nextAllowed;
-        document.getElementById('e-status').innerHTML=`<span class="pill-warn" style="line-height:1.6;">
-          ⚠ Please enter data for <b>${DS(nextAllowed)}</b> first.<br>
-          <span style="font-size:11px;opacity:.8;">Last saved: ${DS(entries[0].date)}. Cannot skip dates.</span>
-        </span>`;
-        setTimeout(()=>onDateChange(),0);
-        return;
-      }
+    const nextAllowed=ADDDAY(entries[0].date);
+
+    if(existing){
+      // This date already has a saved entry — block and snap back to next unsaved date
+      const snapTo=nextAllowed<=TODAY()?nextAllowed:TODAY();
+      document.getElementById('e-date').value=snapTo;
+      // Show a non-blocking toast-style notice, then reload correct date
+      const st=document.getElementById('e-status');
+      st.innerHTML=`<span class="pill-warn" style="line-height:1.6;">
+        ⚠ Entry for <b>${DS(dateStr)}</b> already exists.<br>
+        <span style="font-size:11px;opacity:.8;">To edit it, use Settings → Edit Previous Entry.</span>
+      </span>`;
+      // Clear fields and load the snap-to date
+      clearEntry();
+      document.getElementById('e-date').value=snapTo;
+      setTimeout(()=>onDateChange(),0);
+      return;
+    }
+
+    if(dateStr>nextAllowed){
+      // Gap detected — snap to next allowed
+      document.getElementById('e-date').value=nextAllowed;
+      document.getElementById('e-status').innerHTML=`<span class="pill-warn" style="line-height:1.6;">
+        ⚠ Please enter data for <b>${DS(nextAllowed)}</b> first.<br>
+        <span style="font-size:11px;opacity:.8;">Last saved: ${DS(entries[0].date)}. Cannot skip dates.</span>
+      </span>`;
+      setTimeout(()=>onDateChange(),0);
+      return;
     }
   }
   // ── END GUARD ──────────────────────────────────────────────────
@@ -1180,28 +1194,6 @@ function onDateChange(){
   if(source==='prev') st.innerHTML=`<span class="pill-ok">✓ Openings from ${DS(prevDate)} closing</span>`;
   else st.innerHTML=`<span class="pill-warn">⚠ No previous entry found — please check opening readings</span>`;
   ['ms','hsd','pow'].forEach(f=>NOZZLES[f].forEach(id=>calcNz(id,f)));
-  // Load existing
-  const ex=C.entries().find(e=>e.date===dateStr);
-  if(ex){
-    ALL_NZ.forEach(id=>{const ci=document.getElementById('c-'+id);if(ci&&ex.nozzles[id])ci.value=ex.nozzles[id].close||'';});
-    const s=C.settings();
-    document.getElementById('r-ms').value=ex.msRate||s.msRate||0;
-    document.getElementById('r-hsd').value=ex.hsdRate||s.hsdRate||0;
-    document.getElementById('r-pow').value=ex.powRate||s.powRate||0;
-    const tm=document.getElementById('test-ms');const th=document.getElementById('test-hsd');const tp=document.getElementById('test-pow');
-    if(tm)tm.value=ex.testingMs||'';if(th)th.value=ex.testingHsd||'';if(tp)tp.value=ex.testingPow||'';
-    document.getElementById('e-remarks').value=ex.remarks||'';
-    document.getElementById('cash1').value=ex.cash1||'';document.getElementById('cash2').value=ex.cash2||'';
-    document.getElementById('cash3').value=ex.cash3||'';document.getElementById('paytm').value=ex.paytm||'';
-    document.getElementById('bank-transfer').value=ex.bankTransfer||'';
-    document.getElementById('hp-pay').value=ex.hpPay||'';
-    document.getElementById('ccms').value=ex.ccms||'';
-    tEx=[...(ex.expenses||[])];tTk=[...(ex.tankers||[])];
-    tCr=C.credits().filter(c=>c.date===dateStr).map(c=>({...c}));
-    renderTCr();renderTEx();renderTTk();
-    ['ms','hsd','pow'].forEach(f=>NOZZLES[f].forEach(id=>calcNz(id,f)));
-    calcDiff();
-  }
 }
 
 function calcNz(id,fuel){
